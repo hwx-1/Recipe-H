@@ -10,6 +10,7 @@ import { PrefKey, AppConst } from '../common/Constants';
 import { CoupleSpace, PendingInvite } from '../model/CoupleSpace';
 import { SpaceFeedItem } from '../model/SpaceFeedItem';
 import { SpaceTask, SpaceTaskStatus, SpaceTaskType } from '../model/SpaceTask';
+import { LocalUserIds } from '../service/LocalUserService';
 
 export const SPACE_VERSION: string = 'spaceVersion';
 export const KEY_SPACE_BOUND: string = 'isSpaceBound';
@@ -36,6 +37,24 @@ export class SpaceRepository {
   initStorage(): void {
     AppStorage.setOrCreate(SPACE_VERSION, 0);
     AppStorage.setOrCreate(KEY_SPACE_BOUND, false);
+  }
+
+  /**
+   * 本地演示：自动创建「我 + TA」情侣空间，无需登录与邀请码。
+   */
+  ensureLocalCoupleSpace(): void {
+    this.ensureLoaded();
+    if (this.isBound()) {
+      return;
+    }
+    this.store.space = {
+      id: 'space_local',
+      memberIds: [LocalUserIds.SELF, LocalUserIds.PARTNER],
+      memberNames: [LocalUserIds.SELF_NAME, LocalUserIds.PARTNER_NAME],
+      status: 'active',
+      boundAt: Date.now()
+    };
+    this.bump();
   }
 
   private ensureLoaded(): void {

@@ -17,9 +17,8 @@ import { RecipeStatsRepository } from '../repository/RecipeStatsRepository';
 import { RecipeStatsBar } from '../components/recipe/RecipeStatsBar';
 import { ForwardPhrasePicker } from '../components/space/ForwardPhrasePicker';
 import { CookingSessionManager } from '../service/CookingSessionManager';
-import { SpaceRepository, KEY_SPACE_BOUND } from '../repository/SpaceRepository';
-import { KEY_IS_LOGGED_IN, KEY_USER_NICK_NAME, KEY_USER_UNION_ID } from '../service/AccountService';
-import { RouteName } from '../common/Constants';
+import { SpaceRepository } from '../repository/SpaceRepository';
+import { LocalUserService } from '../service/LocalUserService';
 import { SoundService } from '../service/SoundService';
 import { rippleTransition } from '../common/transition/WaterRippleTransition';
 
@@ -32,12 +31,9 @@ export struct RecipeDetailPage {
   @State private favorite: boolean = false;
   @State private liked: boolean = false;
   @State private showForwardPicker: boolean = false;
-  @StorageLink(KEY_IS_LOGGED_IN) private isLoggedIn: boolean = false;
-  @StorageLink(KEY_SPACE_BOUND) private bound: boolean = false;
-  @StorageLink(KEY_USER_UNION_ID) private userId: string = '';
-  @StorageLink(KEY_USER_NICK_NAME) private nickName: string = '';
 
   aboutToAppear(): void {
+    SpaceRepository.getInstance().ensureLocalCoupleSpace();
     const repo: RecipeRepository = RecipeRepository.getInstance();
     repo.ensureLoaded(getContext(this));
     this.recipe = repo.getById(this.recipeId);
@@ -78,16 +74,6 @@ export struct RecipeDetailPage {
     if (this.recipe === undefined) {
       return;
     }
-    if (!this.isLoggedIn) {
-      promptAction.showToast({ message: '请先登录', duration: 1500 });
-      this.pathStack.pushPath({ name: RouteName.LOGIN });
-      return;
-    }
-    if (!this.bound) {
-      promptAction.showToast({ message: '请先绑定情侣小空间', duration: 1500 });
-      this.pathStack.pushPath({ name: RouteName.BIND });
-      return;
-    }
     const title: string = this.recipe.title;
     promptAction.showDialog({
       title: '转发到情侣空间',
@@ -104,11 +90,12 @@ export struct RecipeDetailPage {
   }
 
   private forwardWithPhrase(phrase: string): void {
-    if (this.recipe === undefined || this.userId.length === 0) {
+    if (this.recipe === undefined) {
       return;
     }
     SpaceRepository.getInstance()
-      .addFeedShare(this.recipeId, this.recipe.title, phrase, this.userId, this.nickName);
+      .addFeedShare(this.recipeId, this.recipe.title, phrase,
+        LocalUserService.getSelfId(), LocalUserService.getSelfName());
     RecipeStatsRepository.getInstance().addForward(this.recipeId);
     this.showForwardPicker = false;
     SoundService.feedback();
@@ -118,9 +105,9 @@ export struct RecipeDetailPage {
   private finishCooking(): void {
     CookingSessionManager.getInstance().completeByRecipe(this.recipeId);
     this.cooking = false;
-    if (this.bound && this.userId.length > 0 && this.recipe !== undefined) {
+    if (this.recipe !== undefined) {
       SpaceRepository.getInstance()
-        .createRecipeDoneTask(this.recipeId, this.recipe.title, this.userId);
+        .createRecipeDoneTask(this.recipeId, this.recipe.title, LocalUserService.getSelfId());
       this.toast('完成打卡！已通知 TA');
     } else {
       this.toast('完成打卡！');

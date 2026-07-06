@@ -8,7 +8,7 @@ import { promptAction } from '@kit.ArkUI';
 import { PraisePicker } from '../components/space/PraisePicker';
 import { SpaceTask, SpaceTaskStatus, SpaceTaskType } from '../model/SpaceTask';
 import { SpaceRepository, SPACE_VERSION } from '../repository/SpaceRepository';
-import { KEY_USER_UNION_ID } from '../service/AccountService';
+import { LocalUserService } from '../service/LocalUserService';
 import { LocalPhotoService } from '../service/LocalPhotoService';
 import { SoundService } from '../service/SoundService';
 import { rippleTransition } from '../common/transition/WaterRippleTransition';
@@ -17,7 +17,7 @@ import { rippleTransition } from '../common/transition/WaterRippleTransition';
 export struct TaskDetailPage {
   @Prop taskId: string = '';
   pathStack: NavPathStack = new NavPathStack();
-  @StorageLink(KEY_USER_UNION_ID) private userId: string = '';
+  private readonly userId: string = LocalUserService.getSelfId();
   @StorageLink(SPACE_VERSION) private spaceVersion: number = 0;
   @State private task: SpaceTask | undefined = undefined;
   @State private pickingPhoto: boolean = false;
@@ -70,15 +70,18 @@ export struct TaskDetailPage {
   }
 
   private canAccept(): boolean {
-    if (this.task === undefined || this.userId.length === 0) {
+    if (this.task === undefined) {
       return false;
     }
     return this.task.status === SpaceTaskStatus.OPEN && this.task.creatorId !== this.userId;
   }
 
   private canComplete(): boolean {
-    if (this.task === undefined || this.userId.length === 0) {
+    if (this.task === undefined) {
       return false;
+    }
+    if (this.task.status === SpaceTaskStatus.OPEN && this.task.creatorId === this.userId) {
+      return true;
     }
     if (this.task.status !== SpaceTaskStatus.DOING) {
       return false;
@@ -86,17 +89,20 @@ export struct TaskDetailPage {
     if (this.task.assigneeId.length > 0) {
       return this.task.assigneeId === this.userId;
     }
-    return this.task.creatorId !== this.userId;
+    return this.task.creatorId === this.userId;
   }
 
   private canAddPhoto(): boolean {
     if (this.task === undefined) {
       return false;
     }
-    return this.task.status === SpaceTaskStatus.DOING &&
-      (this.task.type === SpaceTaskType.ERRAND ||
-        this.task.type === SpaceTaskType.DAILY_PACT ||
-        this.task.type === SpaceTaskType.CUSTOM);
+    const canPhoto: boolean = this.task.type === SpaceTaskType.ERRAND ||
+      this.task.type === SpaceTaskType.DAILY_PACT ||
+      this.task.type === SpaceTaskType.CUSTOM;
+    if (!canPhoto) {
+      return false;
+    }
+    return this.task.status === SpaceTaskStatus.OPEN || this.task.status === SpaceTaskStatus.DOING;
   }
 
   private praisedPersonId(): string {
@@ -110,7 +116,7 @@ export struct TaskDetailPage {
   }
 
   private canPraise(): boolean {
-    if (this.task === undefined || this.userId.length === 0) {
+    if (this.task === undefined) {
       return false;
     }
     return this.task.status === SpaceTaskStatus.DONE && this.userId !== this.praisedPersonId();

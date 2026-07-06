@@ -6,16 +6,14 @@
 import { promptAction } from '@kit.ArkUI';
 import { PrefsUtil } from '../common/PrefsUtil';
 import { PrefKey, RouteName } from '../common/Constants';
-import { AccountService, KEY_IS_LOGGED_IN, KEY_USER_UNION_ID } from '../service/AccountService';
-import { SpaceRepository, KEY_SPACE_BOUND } from '../repository/SpaceRepository';
+import { AccountService, KEY_IS_LOGGED_IN } from '../service/AccountService';
+import { SpaceRepository } from '../repository/SpaceRepository';
 import { rippleTransition } from '../common/transition/WaterRippleTransition';
 
 @Component
 export struct SettingsPage {
   pathStack: NavPathStack = new NavPathStack();
   @StorageLink(KEY_IS_LOGGED_IN) private isLoggedIn: boolean = false;
-  @StorageLink(KEY_SPACE_BOUND) private bound: boolean = false;
-  @StorageLink(KEY_USER_UNION_ID) private userId: string = '';
   @State private soundEnabled: boolean = true;
   @State private reminderEnabled: boolean = true;
 
@@ -26,16 +24,17 @@ export struct SettingsPage {
 
   private confirmUnbind(): void {
     promptAction.showDialog({
-      title: '解绑情侣空间',
-      message: '解绑后本机的小空间动态与任务将被清除。确定继续吗？',
+      title: '重置小空间',
+      message: '将清除所有动态与任务，并恢复为本地演示空间。确定继续吗？',
       buttons: [
         { text: '取消', color: '#8A8A99' },
         { text: '解绑', color: '#FF6B81' }
       ]
     }).then((res: promptAction.ShowDialogSuccessResponse) => {
-      if (res.index === 1 && this.userId.length > 0) {
-        SpaceRepository.getInstance().unbind(this.userId);
-        promptAction.showToast({ message: '已解绑情侣空间', duration: 1500 });
+      if (res.index === 1) {
+        SpaceRepository.getInstance().unbind('');
+        SpaceRepository.getInstance().ensureLocalCoupleSpace();
+        promptAction.showToast({ message: '小空间已重置', duration: 1500 });
       }
     });
   }
@@ -116,13 +115,13 @@ export struct SettingsPage {
             PrefsUtil.setBoolean(PrefKey.COOK_REMINDER_ENABLED, v);
           })
 
-          if (this.isLoggedIn && this.bound) {
+          if (SpaceRepository.getInstance().isBound()) {
             Text('情侣空间')
               .fontSize($r('app.float.font_caption'))
               .fontColor($r('app.color.text_secondary'))
               .width('100%')
               .margin({ top: 8 })
-            this.ActionRow('解绑情侣空间', true, () => {
+            this.ActionRow('重置小空间数据', true, () => {
               this.confirmUnbind();
             })
           }

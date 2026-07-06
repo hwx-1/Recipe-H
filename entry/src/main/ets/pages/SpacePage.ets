@@ -1,26 +1,23 @@
 /**
  * SpacePage - 情侣小空间(Tab)
  *
- * 作用：上区动态卡片、下区待办任务；支持创建需求、下拉刷新、未读联动。
+ * 作用：顶部固定空间信息卡，下方滚动动态与待办；仅「我」的视角。
  */
 import { promptAction } from '@kit.ArkUI';
-import { EmptyState } from '../components/common/EmptyState';
 import { SpaceFeedCard } from '../components/space/SpaceFeedCard';
 import { SpaceTaskCard } from '../components/space/SpaceTaskCard';
 import { SpaceFeedItem } from '../model/SpaceFeedItem';
 import { SpaceTask, SpaceTaskType } from '../model/SpaceTask';
 import { PresetPhrases } from '../common/PresetPhrases';
-import { SpaceRepository, KEY_SPACE_BOUND, SPACE_VERSION } from '../repository/SpaceRepository';
-import { KEY_IS_LOGGED_IN, KEY_USER_UNION_ID } from '../service/AccountService';
+import { SpaceRepository, SPACE_VERSION } from '../repository/SpaceRepository';
+import { LocalUserService } from '../service/LocalUserService';
 import { RouteName } from '../common/Constants';
 
 @Component
 export struct SpacePage {
   pathStack: NavPathStack = new NavPathStack();
-  @StorageLink(KEY_SPACE_BOUND) private bound: boolean = false;
-  @StorageLink(KEY_IS_LOGGED_IN) private isLoggedIn: boolean = false;
-  @StorageLink(KEY_USER_UNION_ID) private userId: string = '';
   @StorageLink(SPACE_VERSION) private spaceVersion: number = 0;
+  private readonly userId: string = LocalUserService.getSelfId();
   @State private feeds: SpaceFeedItem[] = [];
   @State private tasks: SpaceTask[] = [];
   @State private isRefreshing: boolean = false;
@@ -30,13 +27,17 @@ export struct SpacePage {
   @State private selectedPact: string = '';
 
   aboutToAppear(): void {
+    SpaceRepository.getInstance().ensureLocalCoupleSpace();
     this.reload();
   }
 
   private reload(): void {
-    this.bound = SpaceRepository.getInstance().isBound();
     this.feeds = SpaceRepository.getInstance().getFeedItems();
     this.tasks = SpaceRepository.getInstance().getActiveTasks();
+  }
+
+  private partnerName(): string {
+    return SpaceRepository.getInstance().getPartnerName(this.userId);
   }
 
   private createTask(): void {
@@ -57,6 +58,32 @@ export struct SpacePage {
     this.showCreate = false;
     this.reload();
     promptAction.showToast({ message: '需求已发布', duration: 1200 });
+  }
+
+  @Builder
+  SpaceHeaderCard() {
+    Column({ space: 6 }) {
+      Row({ space: 10 }) {
+        Text('💞')
+          .fontSize(28)
+        Column({ space: 4 }) {
+          Text(`${this.partnerName()} 和我的小空间`)
+            .fontSize($r('app.float.font_subtitle'))
+            .fontWeight(FontWeight.Medium)
+            .fontColor($r('app.color.text_primary'))
+          Text(`在一起第 ${SpaceRepository.getInstance().getBoundDays()} 天`)
+            .fontSize($r('app.float.font_caption'))
+            .fontColor($r('app.color.brand'))
+        }
+        .alignItems(HorizontalAlign.Start)
+        .layoutWeight(1)
+      }
+      .width('100%')
+    }
+    .width('100%')
+    .padding(16)
+    .backgroundColor($r('app.color.card_bg'))
+    .borderRadius(16)
   }
 
   @Builder
@@ -116,7 +143,6 @@ export struct SpacePage {
     .padding(16)
     .backgroundColor($r('app.color.card_bg'))
     .borderRadius(16)
-    .margin({ bottom: 12 })
   }
 
   @Builder
@@ -132,6 +158,17 @@ export struct SpacePage {
       })
   }
 
+  @Builder
+  SectionTitle(text: string) {
+    Text(text)
+      .fontSize($r('app.float.font_subtitle'))
+      .fontWeight(FontWeight.Medium)
+      .fontColor($r('app.color.text_primary'))
+      .width('100%')
+      .padding({ top: 4, bottom: 4 })
+      .backgroundColor($r('app.color.page_bg'))
+  }
+
   build() {
     Column() {
       Row() {
@@ -140,124 +177,107 @@ export struct SpacePage {
           .fontWeight(FontWeight.Bold)
           .fontColor($r('app.color.text_primary'))
           .layoutWeight(1)
-        if (this.bound && this.isLoggedIn) {
-          Button('+ 需求')
-            .height(32)
-            .fontSize($r('app.float.font_caption'))
-            .fontColor($r('app.color.text_on_brand'))
-            .backgroundColor($r('app.color.brand'))
-            .borderRadius(16)
-            .onClick(() => {
-              this.showCreate = !this.showCreate;
-            })
-        }
+        Button('+ 需求')
+          .height(32)
+          .fontSize($r('app.float.font_caption'))
+          .fontColor($r('app.color.text_on_brand'))
+          .backgroundColor($r('app.color.brand'))
+          .borderRadius(16)
+          .margin({ right: 8 })
+          .onClick(() => {
+            this.showCreate = !this.showCreate;
+          })
+        Text('⚙️')
+          .fontSize(20)
+          .onClick(() => {
+            this.pathStack.pushPath({ name: RouteName.BIND });
+          })
       }
       .width('100%')
       .padding({ left: 16, right: 16, top: 12, bottom: 8 })
 
-      if (!this.isLoggedIn) {
-        Column() {
-          EmptyState({
-            emoji: '🔐',
-            message: '登录后即可使用情侣小空间',
-            buttonText: '去登录',
-            onButtonClick: () => {
-              this.pathStack.pushPath({ name: RouteName.LOGIN });
-            }
-          })
+      Column({ space: 12 }) {
+        this.SpaceHeaderCard()
+        if (this.showCreate) {
+          this.CreatePanel()
         }
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.Center)
-      } else if (!this.bound) {
-        Column() {
-          EmptyState({
-            emoji: '💌',
-            message: '还没有和 TA 绑定小空间',
-            buttonText: '邀请 TA 加入',
-            onButtonClick: () => {
-              this.pathStack.pushPath({ name: RouteName.BIND });
-            }
-          })
-        }
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.Center)
-      } else {
-        Refresh({ refreshing: $$this.isRefreshing }) {
-          Scroll() {
-            Column({ space: 12 }) {
-              if (this.showCreate) {
-                this.CreatePanel()
-              }
-
-              Row({ space: 8 }) {
-                Text('💞')
-                  .fontSize(20)
-                Text(`和 ${SpaceRepository.getInstance().getPartnerName(this.userId)} 的小空间`)
-                  .fontSize($r('app.float.font_caption'))
-                  .fontColor($r('app.color.text_secondary'))
-              }
-              .width('100%')
-
-              Text('空间动态')
-                .fontSize($r('app.float.font_subtitle'))
-                .fontWeight(FontWeight.Medium)
-                .width('100%')
-              if (this.feeds.length === 0) {
-                Text('还没有分享动态，去食谱页转发吧')
-                  .fontSize($r('app.float.font_caption'))
-                  .fontColor($r('app.color.text_secondary'))
-                  .width('100%')
-              } else {
-                ForEach(this.feeds, (item: SpaceFeedItem) => {
-                  SpaceFeedCard({
-                    item: item,
-                    viewerId: this.userId,
-                    onCardClick: (recipeId: string) => {
-                      SpaceRepository.getInstance().markFeedRead(item.id);
-                      this.pathStack.pushPath({ name: RouteName.RECIPE_DETAIL, param: recipeId });
-                    }
-                  })
-                }, (item: SpaceFeedItem) => `${item.id}_${this.spaceVersion}`)
-              }
-
-              Text('待办任务')
-                .fontSize($r('app.float.font_subtitle'))
-                .fontWeight(FontWeight.Medium)
-                .width('100%')
-                .margin({ top: 8 })
-              if (this.tasks.length === 0) {
-                Text('目前无待办，可以想想做什么或者买什么啦')
-                  .fontSize($r('app.float.font_caption'))
-                  .fontColor($r('app.color.text_secondary'))
-                  .width('100%')
-              } else {
-                ForEach(this.tasks, (task: SpaceTask) => {
-                  SpaceTaskCard({
-                    task: task,
-                    showUnread: true,
-                    onCardClick: (taskId: string) => {
-                      this.pathStack.pushPath({ name: RouteName.TASK_DETAIL, param: taskId });
-                    }
-                  })
-                }, (task: SpaceTask) => `${task.id}_${this.spaceVersion}`)
-              }
-            }
-            .padding({ left: 16, right: 16, bottom: 24 })
-          }
-          .width('100%')
-          .height('100%')
-          .scrollBar(BarState.Off)
-        }
-        .layoutWeight(1)
-        .onRefreshing(() => {
-          this.isRefreshing = true;
-          this.reload();
-          this.isRefreshing = false;
-        })
+        this.SectionTitle('空间动态')
       }
+      .width('100%')
+      .padding({ left: 16, right: 16 })
+
+      Scroll() {
+        Column({ space: 12 }) {
+          if (this.feeds.length === 0) {
+            Text('还没有分享动态，去食谱页转发吧')
+              .fontSize($r('app.float.font_caption'))
+              .fontColor($r('app.color.text_secondary'))
+              .width('100%')
+          } else {
+            ForEach(this.feeds, (item: SpaceFeedItem) => {
+              SpaceFeedCard({
+                item: item,
+                viewerId: this.userId,
+                onCardClick: (recipeId: string) => {
+                  SpaceRepository.getInstance().markFeedRead(item.id);
+                  this.pathStack.pushPath({ name: RouteName.RECIPE_DETAIL, param: recipeId });
+                }
+              })
+            }, (item: SpaceFeedItem) => `${item.id}_${this.spaceVersion}`)
+          }
+        }
+        .padding({ left: 16, right: 16 })
+      }
+      .width('100%')
+      .constraintSize({ maxHeight: this.feeds.length === 0 ? 40 : 220 })
+      .scrollBar(BarState.Off)
+
+      Column() {
+        this.SectionTitle('待办任务')
+      }
+      .width('100%')
+      .padding({ left: 16, right: 16 })
+
+      Refresh({ refreshing: $$this.isRefreshing }) {
+        Scroll() {
+          Column({ space: 12 }) {
+            if (this.tasks.length === 0) {
+              Text('目前无待办，可以点右上角发布需求')
+                .fontSize($r('app.float.font_caption'))
+                .fontColor($r('app.color.text_secondary'))
+                .width('100%')
+            } else {
+              ForEach(this.tasks, (task: SpaceTask) => {
+                SpaceTaskCard({
+                  task: task,
+                  showUnread: true,
+                  onCardClick: (taskId: string) => {
+                    this.pathStack.pushPath({ name: RouteName.TASK_DETAIL, param: taskId });
+                  }
+                })
+              }, (task: SpaceTask) => `${task.id}_${this.spaceVersion}`)
+            }
+          }
+          .padding({ left: 16, right: 16, bottom: 24 })
+        }
+        .width('100%')
+        .height('100%')
+        .scrollBar(BarState.Off)
+      }
+      .layoutWeight(1)
+      .onRefreshing(() => {
+        this.isRefreshing = true;
+        this.reload();
+        this.isRefreshing = false;
+      })
     }
     .width('100%')
     .height('100%')
     .backgroundColor($r('app.color.page_bg'))
+    .onVisibleAreaChange([0.0, 1.0], (isExpanding: boolean, _currentRatio: number) => {
+      if (isExpanding) {
+        this.reload();
+      }
+    })
   }
 }
