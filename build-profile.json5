@@ -1,19 +1,6 @@
 {
   "app": {
     "signingConfigs": [
-      {
-        "name": "default",
-        "type": "HarmonyOS",
-        "material": {
-          "certpath": "/Users/zhihu/.ohos/config/default_NeLogismRecipe_g48xvRLFSwOhuGb7xJY-dK-ZdvTl5-sdUEeBz1-Su7c=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001B0347A39BA8B52D4C157AD0E96A508E0B5CD33E5FACFC719E01385099D86491A905A3A089D10288",
-          "profile": "/Users/zhihu/.ohos/config/default_NeLogismRecipe_g48xvRLFSwOhuGb7xJY-dK-ZdvTl5-sdUEeBz1-Su7c=.p7b",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/zhihu/.ohos/config/default_NeLogismRecipe_g48xvRLFSwOhuGb7xJY-dK-ZdvTl5-sdUEeBz1-Su7c=.p12",
-          "storePassword": "0000001B28BBADB45E039B1A07CA06519F514FB35D0DF3CE353D1A6429CD7AC99D2D00C030C49FB34B3FD6"
-        }
-      }
     ],
     "products": [
       {
