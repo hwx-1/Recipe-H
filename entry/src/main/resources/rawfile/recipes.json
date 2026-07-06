@@ -1,0 +1,314 @@
+{
+  "recipes": [
+    {
+      "id": "r_tangcu_paigu",
+      "title": "糖醋排骨",
+      "cover": "recipes/tangcu_paigu.jpg",
+      "tags": ["下饭", "宴客"],
+      "categories": ["big_dish", "festival"],
+      "timeMinutes": 45,
+      "difficulty": "medium",
+      "servings": 2,
+      "ingredients": [
+        { "name": "肋排", "amount": "500g" },
+        { "name": "冰糖", "amount": "40g" },
+        { "name": "香醋", "amount": "3勺" },
+        { "name": "生抽", "amount": "2勺" },
+        { "name": "料酒", "amount": "2勺" },
+        { "name": "姜", "amount": "3片" }
+      ],
+      "steps": [
+        { "order": 1, "text": "排骨冷水下锅，加姜片和料酒焯水，撇去浮沫后捞出沥干。" },
+        { "order": 2, "text": "锅中少油，下冰糖小火炒出焦糖色，冒小泡时下排骨翻炒上色。" },
+        { "order": 3, "text": "加生抽、香醋、料酒翻匀，倒入没过排骨的热水。" },
+        { "order": 4, "text": "大火烧开转小火焖25分钟，最后大火收汁至浓稠亮泽即可。" }
+      ],
+      "tips": "炒糖色时全程小火，颜色微微变红就下排骨，过头会发苦。"
+    },
+    {
+      "id": "r_fanqie_chaodan",
+      "title": "番茄炒蛋",
+      "cover": "recipes/fanqie_chaodan.jpg",
+      "tags": ["快手", "下饭"],
+      "categories": ["simple_two", "quick_15"],
+      "timeMinutes": 12,
+      "difficulty": "easy",
+      "servings": 2,
+      "ingredients": [
+        { "name": "番茄", "amount": "2个" },
+        { "name": "鸡蛋", "amount": "3个" },
+        { "name": "白糖", "amount": "1勺" },
+        { "name": "盐", "amount": "适量" },
+        { "name": "葱花", "amount": "少许" }
+      ],
+      "steps": [
+        { "order": 1, "text": "鸡蛋打散加少许盐，番茄切块。" },
+        { "order": 2, "text": "热油倒入蛋液，凝固后划散盛出备用。" },
+        { "order": 3, "text": "锅中下番茄炒出汁，加白糖和盐调味。" },
+        { "order": 4, "text": "倒回鸡蛋翻匀，撒葱花出锅。" }
+      ],
+      "tips": "加一勺白糖能中和番茄酸味，味道更柔和。"
+    },
+    {
+      "id": "r_niupai",
+      "title": "香煎黑椒牛排",
+      "cover": "recipes/niupai.jpg",
+      "tags": ["西式", "浪漫"],
+      "categories": ["candlelight", "festival"],
+      "timeMinutes": 25,
+      "difficulty": "medium",
+      "servings": 2,
+      "ingredients": [
+        { "name": "西冷牛排", "amount": "2块" },
+        { "name": "黑胡椒", "amount": "适量" },
+        { "name": "海盐", "amount": "适量" },
+        { "name": "黄油", "amount": "20g" },
+        { "name": "迷迭香", "amount": "2枝" }
+      ],
+      "steps": [
+        { "order": 1, "text": "牛排提前30分钟室温回温，厨房纸吸干表面水分。" },
+        { "order": 2, "text": "两面撒海盐和黑胡椒，热锅热油每面煎90秒形成焦壳。" },
+        { "order": 3, "text": "转小火加黄油和迷迭香，用勺不断淋油增香。" },
+        { "order": 4, "text": "取出静置5分钟再切，锁住肉汁。" }
+      ],
+      "tips": "静置这一步别省，能让肉汁回流，切开不流血水。"
+    },
+    {
+      "id": "r_jixiong_shala",
+      "title": "鸡胸肉牛油果沙拉",
+      "cover": "recipes/jixiong_shala.jpg",
+      "tags": ["低卡", "健康"],
+      "categories": ["light_food", "quick_15"],
+      "timeMinutes": 15,
+      "difficulty": "easy",
+      "servings": 2,
+      "ingredients": [
+        { "name": "鸡胸肉", "amount": "200g" },
+        { "name": "牛油果", "amount": "1个" },
+        { "name": "生菜", "amount": "1把" },
+        { "name": "小番茄", "amount": "8个" },
+        { "name": "橄榄油", "amount": "1勺" },
+        { "name": "黑胡椒", "amount": "适量" }
+      ],
+      "steps": [
+        { "order": 1, "text": "鸡胸肉加盐和黑胡椒腌10分钟，煎熟后切条。" },
+        { "order": 2, "text": "生菜撕块、小番茄对半、牛油果切片。" },
+        { "order": 3, "text": "所有食材装碗，淋橄榄油和黑胡椒拌匀即可。" }
+      ],
+      "tips": "鸡胸煎前拍松一点更嫩，也可用水煮替代减脂。"
+    },
+    {
+      "id": "r_sanmingzhi",
+      "title": "元气三明治",
+      "cover": "recipes/sanmingzhi.jpg",
+      "tags": ["快手", "早餐"],
+      "categories": ["breakfast", "quick_15"],
+      "timeMinutes": 10,
+      "difficulty": "easy",
+      "servings": 2,
+      "ingredients": [
+        { "name": "吐司", "amount": "4片" },
+        { "name": "鸡蛋", "amount": "2个" },
+        { "name": "生菜", "amount": "2片" },
+        { "name": "火腿", "amount": "2片" },
+        { "name": "沙拉酱", "amount": "适量" }
+      ],
+      "steps": [
+        { "order": 1, "text": "吐司微微烤热，鸡蛋煎成溏心或全熟。" },
+        { "order": 2, "text": "吐司抹沙拉酱，依次铺生菜、火腿、煎蛋。" },
+        { "order": 3, "text": "盖上另一片吐司，对角切开即可。" }
+      ],
+      "tips": "生菜要擦干水分，三明治才不会湿软。"
+    },
+    {
+      "id": "r_paigu_tang",
+      "title": "玉米排骨汤",
+      "cover": "recipes/paigu_tang.jpg",
+      "tags": ["滋补", "清甜"],
+      "categories": ["soup", "big_dish"],
+      "timeMinutes": 70,
+      "difficulty": "easy",
+      "servings": 2,
+      "ingredients": [
+        { "name": "排骨", "amount": "400g" },
+        { "name": "玉米", "amount": "1根" },
+        { "name": "胡萝卜", "amount": "1根" },
+        { "name": "姜", "amount": "3片" },
+        { "name": "盐", "amount": "适量" }
+      ],
+      "steps": [
+        { "order": 1, "text": "排骨冷水焯去血沫，玉米和胡萝卜切块。" },
+        { "order": 2, "text": "排骨与姜片下砂锅，加足量清水大火烧开。" },
+        { "order": 3, "text": "转小火炖40分钟后下玉米胡萝卜，再炖20分钟。" },
+        { "order": 4, "text": "出锅前加盐调味即可。" }
+      ],
+      "tips": "全程别频繁开盖，汤色更清、味更浓。"
+    },
+    {
+      "id": "r_mapo_doufu",
+      "title": "麻婆豆腐（素）",
+      "cover": "recipes/mapo_doufu.jpg",
+      "tags": ["下饭", "微辣"],
+      "categories": ["vegetarian", "simple_two"],
+      "timeMinutes": 20,
+      "difficulty": "medium",
+      "servings": 2,
+      "ingredients": [
+        { "name": "嫩豆腐", "amount": "1盒" },
+        { "name": "豆瓣酱", "amount": "1勺" },
+        { "name": "花椒粉", "amount": "适量" },
+        { "name": "蒜末", "amount": "1勺" },
+        { "name": "水淀粉", "amount": "适量" },
+        { "name": "葱花", "amount": "少许" }
+      ],
+      "steps": [
+        { "order": 1, "text": "豆腐切块，沸水加盐焯30秒去豆腥后捞出。" },
+        { "order": 2, "text": "热油炒香蒜末和豆瓣酱出红油，加少量清水烧开。" },
+        { "order": 3, "text": "下豆腐轻推煮3分钟，分次淋水淀粉勾芡。" },
+        { "order": 4, "text": "撒花椒粉和葱花出锅。" }
+      ],
+      "tips": "推豆腐要用铲背轻推，避免碎块。"
+    },
+    {
+      "id": "r_congyou_banmian",
+      "title": "葱油拌面",
+      "cover": "recipes/congyou_banmian.jpg",
+      "tags": ["快手", "主食"],
+      "categories": ["noodle_staple", "quick_15", "night_snack"],
+      "timeMinutes": 15,
+      "difficulty": "easy",
+      "servings": 2,
+      "ingredients": [
+        { "name": "细面", "amount": "200g" },
+        { "name": "小葱", "amount": "1把" },
+        { "name": "生抽", "amount": "3勺" },
+        { "name": "老抽", "amount": "1勺" },
+        { "name": "白糖", "amount": "1勺" }
+      ],
+      "steps": [
+        { "order": 1, "text": "小葱切段，冷油下锅小火慢炸至焦黄成葱油。" },
+        { "order": 2, "text": "用葱油炒生抽、老抽、白糖成料汁。" },
+        { "order": 3, "text": "面条煮熟过凉水沥干，拌入葱油和料汁即可。" }
+      ],
+      "tips": "炸葱一定小火，闻到焦香、葱变褐色马上关火。"
+    },
+    {
+      "id": "r_shufu_songbing",
+      "title": "舒芙蕾松饼",
+      "cover": "recipes/shufu_songbing.jpg",
+      "tags": ["甜点", "拍照好看"],
+      "categories": ["snack_dessert", "breakfast"],
+      "timeMinutes": 30,
+      "difficulty": "hard",
+      "servings": 2,
+      "ingredients": [
+        { "name": "鸡蛋", "amount": "2个" },
+        { "name": "低筋面粉", "amount": "30g" },
+        { "name": "牛奶", "amount": "20g" },
+        { "name": "细砂糖", "amount": "20g" }
+      ],
+      "steps": [
+        { "order": 1, "text": "分离蛋清蛋黄，蛋黄加牛奶和面粉拌匀。" },
+        { "order": 2, "text": "蛋清分次加糖打发到硬性发泡。" },
+        { "order": 3, "text": "蛋白霜分三次翻拌进蛋黄糊，保持蓬松。" },
+        { "order": 4, "text": "小火不粘锅堆高面糊，加盖每面煎4分钟。" }
+      ],
+      "tips": "全程最小火，加几滴水在锅边盖盖焖，更易熟透不塌。"
+    },
+    {
+      "id": "r_qingjiao_rousi",
+      "title": "青椒肉丝",
+      "cover": "recipes/qingjiao_rousi.jpg",
+      "tags": ["下饭", "家常"],
+      "categories": ["simple_two", "bento"],
+      "timeMinutes": 18,
+      "difficulty": "easy",
+      "servings": 2,
+      "ingredients": [
+        { "name": "猪里脊", "amount": "200g" },
+        { "name": "青椒", "amount": "3个" },
+        { "name": "生抽", "amount": "2勺" },
+        { "name": "淀粉", "amount": "1勺" },
+        { "name": "蒜末", "amount": "1勺" }
+      ],
+      "steps": [
+        { "order": 1, "text": "里脊切丝，加生抽和淀粉抓匀腌10分钟。" },
+        { "order": 2, "text": "青椒切丝，热油滑散肉丝变色盛出。" },
+        { "order": 3, "text": "爆香蒜末下青椒炒断生，倒回肉丝调味翻匀。" }
+      ],
+      "tips": "肉丝上浆后滑油，口感更嫩滑不柴。"
+    },
+    {
+      "id": "r_hongshao_rou",
+      "title": "红烧肉",
+      "cover": "recipes/hongshao_rou.jpg",
+      "tags": ["硬菜", "下饭"],
+      "categories": ["big_dish", "festival"],
+      "timeMinutes": 80,
+      "difficulty": "medium",
+      "servings": 3,
+      "ingredients": [
+        { "name": "五花肉", "amount": "600g" },
+        { "name": "冰糖", "amount": "40g" },
+        { "name": "生抽", "amount": "3勺" },
+        { "name": "老抽", "amount": "1勺" },
+        { "name": "姜", "amount": "4片" },
+        { "name": "八角", "amount": "2颗" }
+      ],
+      "steps": [
+        { "order": 1, "text": "五花肉切麻将块，冷水加姜焯水后洗净。" },
+        { "order": 2, "text": "少油炒冰糖至焦糖色，下肉块翻炒上色。" },
+        { "order": 3, "text": "加生抽老抽姜八角，倒热水没过肉块。" },
+        { "order": 4, "text": "烧开转小火焖60分钟，大火收汁至油亮。" }
+      ],
+      "tips": "焯水后一定用温水冲洗，冷水会让肉紧缩变柴。"
+    },
+    {
+      "id": "r_zhengdan",
+      "title": "嫩滑水蒸蛋",
+      "cover": "recipes/zhengdan.jpg",
+      "tags": ["快手", "老少皆宜"],
+      "categories": ["light_food", "breakfast", "quick_15"],
+      "timeMinutes": 15,
+      "difficulty": "easy",
+      "servings": 2,
+      "ingredients": [
+        { "name": "鸡蛋", "amount": "3个" },
+        { "name": "温水", "amount": "蛋液1.5倍" },
+        { "name": "生抽", "amount": "少许" },
+        { "name": "香油", "amount": "几滴" }
+      ],
+      "steps": [
+        { "order": 1, "text": "鸡蛋打散，加1.5倍温水搅匀后过筛去泡。" },
+        { "order": 2, "text": "碗上盖保鲜膜戳几个孔，水开上锅中小火蒸10分钟。" },
+        { "order": 3, "text": "出锅淋生抽和香油即可。" }
+      ],
+      "tips": "用温水、过筛、盖膜，是蒸蛋光滑无蜂窝的三个关键。"
+    },
+    {
+      "id": "r_shousi_jiaozi",
+      "title": "白菜猪肉水饺",
+      "cover": "recipes/shuijiao.jpg",
+      "tags": ["主食", "团圆"],
+      "categories": ["noodle_staple", "festival"],
+      "timeMinutes": 60,
+      "difficulty": "medium",
+      "servings": 3,
+      "ingredients": [
+        { "name": "饺子皮", "amount": "40张" },
+        { "name": "猪肉馅", "amount": "300g" },
+        { "name": "白菜", "amount": "半棵" },
+        { "name": "姜末", "amount": "1勺" },
+        { "name": "生抽", "amount": "2勺" },
+        { "name": "香油", "amount": "1勺" }
+      ],
+      "steps": [
+        { "order": 1, "text": "白菜剁碎加盐杀出水分并挤干。" },
+        { "order": 2, "text": "肉馅加姜末、生抽、香油同向搅上劲，拌入白菜。" },
+        { "order": 3, "text": "包入饺子皮捏紧收口。" },
+        { "order": 4, "text": "水开下饺，点两次冷水，浮起鼓胀即熟。" }
+      ],
+      "tips": "肉馅顺一个方向搅打上劲，煮出来更多汁。"
+    }
+  ]
+}

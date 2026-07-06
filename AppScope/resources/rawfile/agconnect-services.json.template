@@ -1,0 +1,33 @@
+{
+  "agcgw": {
+    "url": "connect-drcn.dbankcloud.cn",
+    "backurl": "connect-drcn.hispace.hicloud.com",
+    "websocketurl": "connect-ws-drcn.hispace.dbankcloud.cn",
+    "websocketbackurl": "connect-ws-drcn.hispace.dbankcloud.com"
+  },
+  "client": {
+    "cp_id": "请从 AGC 下载真实文件替换",
+    "product_id": "请从 AGC 下载真实文件替换",
+    "client_id": "请填写你的 Client ID",
+    "client_secret": "请从 AGC 下载真实文件替换",
+    "project_id": "请从 AGC 下载真实文件替换",
+    "app_id": "请从 AGC 下载真实文件替换",
+    "api_key": "请从 AGC 下载真实文件替换",
+    "package_name": "com.xinyu.recipe"
+  },
+  "oauth_client": {
+    "client_id": "请填写你的 Client ID",
+    "client_type": 30
+  },
+  "app_info": {
+    "app_id": "请从 AGC 下载真实文件替换",
+    "package_name": "com.xinyu.recipe"
+  },
+  "service": {
+    "analytics": { "collector_url": "datacollector-drcn.dt.hicloud.com,datacollector-drcn.dt.dbankcloud.cn" },
+    "cloudstorage": { "storage_url": "https://agc-storage-drcn.platform.dbankcloud.cn" },
+    "ml": { "mlservice_url": "ml-api-drcn.ai.dbankcloud.com" }
+  },
+  "region": "CN",
+  "configuration_version": "3.0"
+}

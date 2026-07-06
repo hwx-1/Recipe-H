@@ -1,0 +1,52 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "brand",
+      "value": "#FF6B81"
+    },
+    {
+      "name": "brand_light",
+      "value": "#FFD3DA"
+    },
+    {
+      "name": "brand_pressed",
+      "value": "#E85C72"
+    },
+    {
+      "name": "page_bg",
+      "value": "#FFF7F8"
+    },
+    {
+      "name": "card_bg",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "text_primary",
+      "value": "#22222A"
+    },
+    {
+      "name": "text_secondary",
+      "value": "#8A8A99"
+    },
+    {
+      "name": "text_on_brand",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "divider",
+      "value": "#F0E6E8"
+    },
+    {
+      "name": "badge",
+      "value": "#FF3B30"
+    },
+    {
+      "name": "mask",
+      "value": "#66000000"
+    }
+  ]
+}

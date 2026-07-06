@@ -1,0 +1,84 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "情侣食谱小空间"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "情侣食谱小空间"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "心语食记"
+    },
+    {
+      "name": "splash_slogan",
+      "value": "一起做饭，慢慢生活"
+    },
+    {
+      "name": "skip",
+      "value": "跳过"
+    },
+    {
+      "name": "agreement_title",
+      "value": "用户须知"
+    },
+    {
+      "name": "agreement_intro",
+      "value": "在开始使用心语食记前，请阅读并同意以下条款。我们仅在情侣空间内为你和另一半保存互动数据。"
+    },
+    {
+      "name": "agreement_checkbox",
+      "value": "我已阅读并同意"
+    },
+    {
+      "name": "user_agreement",
+      "value": "《用户协议》"
+    },
+    {
+      "name": "privacy_policy",
+      "value": "《隐私政策》"
+    },
+    {
+      "name": "agreement_confirm",
+      "value": "同意并继续"
+    },
+    {
+      "name": "agreement_disagree",
+      "value": "暂不使用"
+    },
+    {
+      "name": "tab_home",
+      "value": "食谱"
+    },
+    {
+      "name": "tab_space",
+      "value": "小空间"
+    },
+    {
+      "name": "tab_tasks",
+      "value": "任务"
+    },
+    {
+      "name": "tab_profile",
+      "value": "我的"
+    },
+    {
+      "name": "permission_internet_reason",
+      "value": "用于华为账号登录与云服务同步"
+    },
+    {
+      "name": "permission_network_info_reason",
+      "value": "用于检测网络连接状态"
+    },
+    {
+      "name": "permission_read_image_reason",
+      "value": "用于任务打卡时从相册选择照片"
+    },
+    {
+      "name": "permission_vibrate_reason",
+      "value": "用于互动操作的触觉反馈"
+    }
+  ]
+}
