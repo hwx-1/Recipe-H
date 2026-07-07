@@ -3,6 +3,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { PrefsUtil } from '../common/PrefsUtil';
 import { AgcInitializer } from '../service/AgcInitializer';
+import { LocalUserService } from '../service/LocalUserService';
 import { AccountService } from '../service/AccountService';
 import { CookingSessionManager } from '../service/CookingSessionManager';
 import { SpaceRepository } from '../repository/SpaceRepository';
@@ -18,7 +19,9 @@ export default class EntryAbility extends UIAbility {
     }
     PrefsUtil.init(this.context);
     AccountService.initStorage();
+    LocalUserService.initStorage();
     SpaceRepository.getInstance().initStorage();
+    SpaceRepository.getInstance().ensureLocalCoupleSpace();
     CookingSessionManager.getInstance().restoreSessions();
     AgcInitializer.init(this.context);
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');

@@ -11,11 +11,11 @@ import { promptAction } from '@kit.ArkUI';
 import { EmptyState } from '../components/common/EmptyState';
 import { CookingSession } from '../model/CookingSession';
 import { CookingSessionManager } from '../service/CookingSessionManager';
-import { SpaceRepository, KEY_SPACE_BOUND, SPACE_VERSION } from '../repository/SpaceRepository';
+import { SpaceRepository, SPACE_VERSION } from '../repository/SpaceRepository';
 import { SpaceTask } from '../model/SpaceTask';
 import { SpaceTaskCard } from '../components/space/SpaceTaskCard';
 import { RouteName } from '../common/Constants';
-import { KEY_USER_UNION_ID } from '../service/AccountService';
+import { LocalUserService } from '../service/LocalUserService';
 import { SoundService } from '../service/SoundService';
 
 @Component
@@ -23,14 +23,13 @@ export struct TasksPage {
   pathStack: NavPathStack = new NavPathStack();
   @StorageLink('activeCookingCount') private cookingCount: number = 0;
   @StorageLink(SPACE_VERSION) private spaceVersion: number = 0;
-  @StorageLink(KEY_SPACE_BOUND) private bound: boolean = false;
-  @StorageLink(KEY_USER_UNION_ID) private userId: string = '';
   @State private sessions: CookingSession[] = [];
   @State private spaceTasks: SpaceTask[] = [];
   @State private now: number = Date.now();
   private timerId: number = -1;
 
   aboutToAppear(): void {
+    SpaceRepository.getInstance().ensureLocalCoupleSpace();
     this.refresh();
     this.timerId = setInterval(() => {
       this.now = Date.now();
@@ -47,11 +46,7 @@ export struct TasksPage {
 
   private refresh(): void {
     this.sessions = CookingSessionManager.getInstance().getActive();
-    if (this.bound) {
-      this.spaceTasks = SpaceRepository.getInstance().getActiveTasks();
-    } else {
-      this.spaceTasks = [];
-    }
+    this.spaceTasks = SpaceRepository.getInstance().getActiveTasks();
   }
 
   private hasAnyTodo(): boolean {
@@ -106,9 +101,8 @@ export struct TasksPage {
           .borderRadius(18)
           .onClick(() => {
             CookingSessionManager.getInstance().completeByRecipe(s.recipeId);
-            if (this.bound && this.userId.length > 0) {
-              SpaceRepository.getInstance().createRecipeDoneTask(s.recipeId, s.recipeTitle, this.userId);
-            }
+            SpaceRepository.getInstance()
+              .createRecipeDoneTask(s.recipeId, s.recipeTitle, LocalUserService.getSelfId());
             this.refresh();
             SoundService.feedback();
             promptAction.showToast({ message: '完成打卡！', duration: 1200 });

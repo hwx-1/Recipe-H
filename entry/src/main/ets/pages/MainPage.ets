@@ -22,7 +22,7 @@ import { LegalDocPage } from './LegalDocPage';
 import { TaskDetailPage } from './TaskDetailPage';
 import { RouteName, KEY_SWITCH_TAB } from '../common/Constants';
 import { SpaceRepository, SPACE_VERSION } from '../repository/SpaceRepository';
-import { KEY_IS_LOGGED_IN, KEY_USER_UNION_ID } from '../service/AccountService';
+import { LocalUserService } from '../service/LocalUserService';
 
 @Component
 export struct MainPage {
@@ -31,8 +31,6 @@ export struct MainPage {
   @StorageLink('activeCookingCount') private cookingCount: number = 0;
   @StorageLink(SPACE_VERSION) @Watch('onSpaceDataChanged') private spaceVersion: number = 0;
   @StorageLink(KEY_SWITCH_TAB) @Watch('onTabSwitchRequest') private switchTabRequest: number = -1;
-  @StorageLink(KEY_IS_LOGGED_IN) private isLoggedIn: boolean = false;
-  @StorageLink(KEY_USER_UNION_ID) private userId: string = '';
   private pathStack: NavPathStack = new NavPathStack();
 
   aboutToAppear(): void {
@@ -52,18 +50,13 @@ export struct MainPage {
   }
 
   private refreshBadges(): void {
-    if (this.isLoggedIn && this.userId.length > 0) {
-      this.spaceBadge = SpaceRepository.getInstance().getUnreadCount(this.userId);
-    } else {
-      this.spaceBadge = 0;
-    }
+    const userId: string = LocalUserService.getSelfId();
+    this.spaceBadge = SpaceRepository.getInstance().getUnreadCount(userId);
   }
 
   private taskBadgeCount(): number {
     let count: number = this.cookingCount;
-    if (this.isLoggedIn && this.userId.length > 0) {
-      count += SpaceRepository.getInstance().getActiveTasks().length;
-    }
+    count += SpaceRepository.getInstance().getActiveTasks().length;
     return count;
   }
 
