@@ -18,6 +18,9 @@ export class RouteName {
   static readonly SETTINGS: string = 'SettingsPage';
   static readonly LEGAL: string = 'LegalDocPage';
   static readonly LOGIN: string = 'LoginPage';
+  static readonly COOK_COMPLETE: string = 'CookCompletePage';
+  static readonly TASK_PUBLISH: string = 'TaskPublishPage';
+  static readonly SPACE_FEED: string = 'SpaceFeedListPage';
 }
 
 /**

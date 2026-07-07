@@ -7,6 +7,9 @@
 import { PrefsUtil } from '../common/PrefsUtil';
 import { PrefKey } from '../common/Constants';
 
+/** AppStorage 键：点赞变更版本号 */
+export const LIKE_VERSION: string = 'likeVersion';
+
 export class LikeRepository {
   private static instance: LikeRepository | undefined = undefined;
   private ids: Set<string> = new Set<string>();
@@ -17,6 +20,10 @@ export class LikeRepository {
       LikeRepository.instance = new LikeRepository();
     }
     return LikeRepository.instance;
+  }
+
+  initStorage(): void {
+    AppStorage.setOrCreate(LIKE_VERSION, 0);
   }
 
   private ensureLoaded(): void {
@@ -32,6 +39,8 @@ export class LikeRepository {
   private persist(): void {
     const arr: string[] = Array.from(this.ids);
     PrefsUtil.setString(PrefKey.LIKE_IDS, JSON.stringify(arr));
+    const ver: number = (AppStorage.get<number>(LIKE_VERSION) ?? 0) + 1;
+    AppStorage.setOrCreate(LIKE_VERSION, ver);
   }
 
   isLiked(id: string): boolean {

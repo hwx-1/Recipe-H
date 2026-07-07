@@ -2,10 +2,9 @@
  * ProfilePage - 我的(Tab)
  */
 import { RouteName } from '../common/Constants';
-import { FavoriteRepository } from '../repository/FavoriteRepository';
-import { LikeRepository } from '../repository/LikeRepository';
+import { FavoriteRepository, FAVORITE_VERSION } from '../repository/FavoriteRepository';
+import { LikeRepository, LIKE_VERSION } from '../repository/LikeRepository';
 import { SpaceRepository, SPACE_VERSION } from '../repository/SpaceRepository';
-import { CookingSessionManager } from '../service/CookingSessionManager';
 import { LocalUserService } from '../service/LocalUserService';
 import {
   KEY_IS_LOGGED_IN,
@@ -19,7 +18,10 @@ export struct ProfilePage {
   @StorageLink(KEY_IS_LOGGED_IN) private isLoggedIn: boolean = false;
   @StorageLink(KEY_USER_NICK_NAME) private nickName: string = '';
   @StorageLink(KEY_USER_AVATAR_URI) private avatarUri: string = '';
-  @StorageLink(SPACE_VERSION) private spaceVersion: number = 0;
+  @StorageLink(SPACE_VERSION) @Watch('onUserRecipeDataChanged') private spaceVersion: number = 0;
+  @StorageLink(FAVORITE_VERSION) @Watch('onUserRecipeDataChanged') private favoriteVersion: number = 0;
+  @StorageLink(LIKE_VERSION) @Watch('onUserRecipeDataChanged') private likeVersion: number = 0;
+  @StorageLink('recipeStatsVersion') @Watch('onUserRecipeDataChanged') private statsVersion: number = 0;
   @State private favoriteCount: number = 0;
   @State private likeCount: number = 0;
   @State private taskDoneCount: number = 0;
@@ -33,9 +35,13 @@ export struct ProfilePage {
   private reloadStats(): void {
     this.favoriteCount = FavoriteRepository.getInstance().getAllIds().length;
     this.likeCount = LikeRepository.getInstance().getAllIds().length;
-    this.cookDoneCount = CookingSessionManager.getInstance().getCompletedCount();
+    this.cookDoneCount = SpaceRepository.getInstance().getCookCompletedCount();
     this.taskDoneCount = SpaceRepository.getInstance()
       .getCompletedTaskCount(LocalUserService.getSelfId());
+  }
+
+  private onUserRecipeDataChanged(): void {
+    this.reloadStats();
   }
 
   private subtitleText(): string {

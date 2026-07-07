@@ -7,6 +7,9 @@
 import { PrefsUtil } from '../common/PrefsUtil';
 import { PrefKey } from '../common/Constants';
 
+/** AppStorage 键：收藏变更版本号 */
+export const FAVORITE_VERSION: string = 'favoriteVersion';
+
 export class FavoriteRepository {
   private static instance: FavoriteRepository | undefined = undefined;
   private ids: Set<string> = new Set<string>();
@@ -17,6 +20,10 @@ export class FavoriteRepository {
       FavoriteRepository.instance = new FavoriteRepository();
     }
     return FavoriteRepository.instance;
+  }
+
+  initStorage(): void {
+    AppStorage.setOrCreate(FAVORITE_VERSION, 0);
   }
 
   private ensureLoaded(): void {
@@ -32,6 +39,8 @@ export class FavoriteRepository {
   private persist(): void {
     const arr: string[] = Array.from(this.ids);
     PrefsUtil.setString(PrefKey.FAVORITE_IDS, JSON.stringify(arr));
+    const ver: number = (AppStorage.get<number>(FAVORITE_VERSION) ?? 0) + 1;
+    AppStorage.setOrCreate(FAVORITE_VERSION, ver);
   }
 
   isFavorite(id: string): boolean {

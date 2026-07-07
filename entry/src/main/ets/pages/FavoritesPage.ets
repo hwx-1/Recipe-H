@@ -9,13 +9,16 @@ import { RecipeCard } from '../components/recipe/RecipeCard';
 import { EmptyState } from '../components/common/EmptyState';
 import { Recipe } from '../model/Recipe';
 import { RecipeRepository } from '../repository/RecipeRepository';
-import { FavoriteRepository } from '../repository/FavoriteRepository';
+import { FavoriteRepository, FAVORITE_VERSION } from '../repository/FavoriteRepository';
+import { RECIPE_STATS_VERSION } from '../repository/RecipeStatsRepository';
 import { RouteName } from '../common/Constants';
 import { rippleTransition } from '../common/transition/WaterRippleTransition';
 
 @Component
 export struct FavoritesPage {
   pathStack: NavPathStack = new NavPathStack();
+  @StorageLink(FAVORITE_VERSION) @Watch('onFavoriteChanged') private favoriteVersion: number = 0;
+  @StorageLink(RECIPE_STATS_VERSION) private statsVersion: number = 0;
   @State private list: Recipe[] = [];
 
   aboutToAppear(): void {
@@ -34,6 +37,10 @@ export struct FavoritesPage {
       }
     });
     this.list = result;
+  }
+
+  private onFavoriteChanged(): void {
+    this.reload();
   }
 
   build() {
@@ -57,7 +64,7 @@ export struct FavoritesPage {
                   }
                 })
               }
-            }, (item: Recipe) => item.id)
+            }, (item: Recipe) => `${item.id}_${this.favoriteVersion}_${this.statsVersion}`)
           }
           .columnsTemplate('1fr 1fr')
           .rowsGap(12)

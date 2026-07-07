@@ -14,7 +14,7 @@ import { rippleTransition } from '../common/transition/WaterRippleTransition';
 @Component
 export struct RankPage {
   pathStack: NavPathStack = new NavPathStack();
-  @StorageLink('recipeStatsVersion') private statsVersion: number = 0;
+  @StorageLink('recipeStatsVersion') @Watch('onStatsVersionChanged') private statsVersion: number = 0;
   @State private tab: number = 0;
   @State private list: Recipe[] = [];
   @State private isRefreshing: boolean = false;
@@ -46,6 +46,10 @@ export struct RankPage {
     });
     this.isEmpty = !anyStat;
     this.list = result.slice(0, 10);
+  }
+
+  private onStatsVersionChanged(): void {
+    this.reload();
   }
 
   @Builder

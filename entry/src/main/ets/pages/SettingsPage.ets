@@ -15,11 +15,9 @@ export struct SettingsPage {
   pathStack: NavPathStack = new NavPathStack();
   @StorageLink(KEY_IS_LOGGED_IN) private isLoggedIn: boolean = false;
   @State private soundEnabled: boolean = true;
-  @State private reminderEnabled: boolean = true;
 
   aboutToAppear(): void {
     this.soundEnabled = PrefsUtil.getBoolean(PrefKey.SOUND_ENABLED, true);
-    this.reminderEnabled = PrefsUtil.getBoolean(PrefKey.COOK_REMINDER_ENABLED, true);
   }
 
   private confirmUnbind(): void {
@@ -109,10 +107,6 @@ export struct SettingsPage {
           this.ToggleRow('互动提示音', this.soundEnabled, (v: boolean) => {
             this.soundEnabled = v;
             PrefsUtil.setBoolean(PrefKey.SOUND_ENABLED, v);
-          })
-          this.ToggleRow('做菜超时提醒', this.reminderEnabled, (v: boolean) => {
-            this.reminderEnabled = v;
-            PrefsUtil.setBoolean(PrefKey.COOK_REMINDER_ENABLED, v);
           })
 
           if (SpaceRepository.getInstance().isBound()) {

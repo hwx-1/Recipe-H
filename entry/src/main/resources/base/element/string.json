@@ -74,7 +74,11 @@
     },
     {
       "name": "permission_read_image_reason",
-      "value": "用于任务打卡时从相册选择照片"
+      "value": "用于从相册选择打卡照片"
+    },
+    {
+      "name": "permission_camera_reason",
+      "value": "用于拍摄菜品成品照片"
     },
     {
       "name": "permission_vibrate_reason",

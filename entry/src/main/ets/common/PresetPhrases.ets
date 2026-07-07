@@ -12,6 +12,11 @@ export class PresetPhrases {
     return ['辛苦了 ❤️', '太好吃了！', '你也太棒了吧', '爱你哟', '谢谢宝贝'];
   }
 
+  /** 做完菜打卡发布到空间的预设文案 */
+  static completePhrases(): string[] {
+    return ['做好啦，来吃饭！', '今日大厨上线 ✨', '成功出锅，求夸夸', '一起开动吧'];
+  }
+
   static dailyPactTemplates(): string[] {
     return ['今晚一起洗碗', '本周一起运动 3 次', '每天说一句我爱你', '一起 11 点前睡觉', '周末一起大扫除'];
   }

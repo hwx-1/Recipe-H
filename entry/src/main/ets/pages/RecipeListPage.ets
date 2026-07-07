@@ -8,7 +8,6 @@ import { RecipeCard } from '../components/recipe/RecipeCard';
 import { EmptyState } from '../components/common/EmptyState';
 import { Recipe } from '../model/Recipe';
 import { RecipeRepository } from '../repository/RecipeRepository';
-import { RecipeStatsRepository } from '../repository/RecipeStatsRepository';
 import { categoryNameById } from '../model/RecipeCategory';
 import { RouteName } from '../common/Constants';
 import { rippleTransition } from '../common/transition/WaterRippleTransition';
@@ -29,7 +28,6 @@ export struct RecipeListPage {
     const repo: RecipeRepository = RecipeRepository.getInstance();
     repo.ensureLoaded(getContext(this));
     this.list = repo.getByCategory(this.categoryId);
-    RecipeStatsRepository.getInstance().bumpVersion();
   }
 
   build() {

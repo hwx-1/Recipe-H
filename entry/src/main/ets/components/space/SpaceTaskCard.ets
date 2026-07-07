@@ -1,32 +1,39 @@
 /**
  * SpaceTaskCard - 空间任务卡片
- *
- * 作用：展示单条 SpaceTask 摘要(标题、状态、类型)，点击进入详情。
  */
-import { SpaceTask, SpaceTaskStatus, SpaceTaskType } from '../../model/SpaceTask';
+import { SpaceTask, SpaceTaskType } from '../../model/SpaceTask';
+import { SpaceRepository } from '../../repository/SpaceRepository';
 
 @Component
 export struct SpaceTaskCard {
   @Prop task: SpaceTask;
+  @Prop viewerId: string = '';
   @Prop showUnread: boolean = false;
   onCardClick?: (taskId: string) => void;
 
+  private priorityLabel(): string {
+    if (this.task.priority === 1) {
+      return '一级';
+    }
+    if (this.task.priority === 2) {
+      return '二级';
+    }
+    return '三级';
+  }
+
   private statusText(): string {
-    if (this.task.status === SpaceTaskStatus.OPEN) {
-      return '待接取';
+    if (this.viewerId.length > 0) {
+      return SpaceRepository.getInstance().getTaskStatusLabel(this.task, this.viewerId);
     }
-    if (this.task.status === SpaceTaskStatus.DOING) {
-      return '进行中';
-    }
-    if (this.task.status === SpaceTaskStatus.DONE) {
-      return '待夸赞';
-    }
-    return '已完成';
+    return SpaceRepository.getInstance().getTaskStatusLabel(this.task, '');
   }
 
   private typeEmoji(): string {
-    if (this.task.type === SpaceTaskType.RECIPE_DONE) {
+    if (this.task.type === SpaceTaskType.RECIPE_DONE || this.task.type === SpaceTaskType.RECIPE_COOKING) {
       return '🍳';
+    }
+    if (this.task.type === SpaceTaskType.RECIPE_FORWARD) {
+      return '💡';
     }
     if (this.task.type === SpaceTaskType.ERRAND) {
       return '🛒';
@@ -45,11 +52,18 @@ export struct SpaceTaskCard {
       Text(this.typeEmoji())
         .fontSize(24)
       Column({ space: 4 }) {
-        Text(this.task.title)
-          .fontSize($r('app.float.font_body'))
-          .fontColor($r('app.color.text_primary'))
-          .maxLines(2)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
+        Row({ space: 6 }) {
+          Text(`[${this.priorityLabel()}]`)
+            .fontSize(10)
+            .fontColor($r('app.color.brand'))
+          Text(this.task.title)
+            .fontSize($r('app.float.font_body'))
+            .fontColor($r('app.color.text_primary'))
+            .maxLines(2)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .layoutWeight(1)
+        }
+        .width('100%')
         Text(this.statusText())
           .fontSize($r('app.float.font_caption'))
           .fontColor($r('app.color.text_secondary'))
@@ -63,9 +77,9 @@ export struct SpaceTaskCard {
       }
     }
     .width('100%')
-    .padding(12)
+    .padding(16)
     .backgroundColor($r('app.color.card_bg'))
-    .borderRadius($r('app.float.radius_card'))
+    .borderRadius(16)
     .onClick(() => {
       this.onCardClick?.(this.task.id);
     })

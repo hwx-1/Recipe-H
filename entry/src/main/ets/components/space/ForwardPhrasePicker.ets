@@ -1,22 +1,36 @@
 /**
- * ForwardPhrasePicker - 转发预设文案选择器
- *
- * 作用：转发食谱到情侣空间时，从系统预设文案中选择一句。
+ * ForwardPhrasePicker - 想做了：文案 + 优先级
  */
 import { PresetPhrases } from '../../common/PresetPhrases';
+import { PriorityPicker } from './PriorityPicker';
 
 @Component
 export struct ForwardPhrasePicker {
-  onSelect?: (phrase: string) => void;
+  @Prop selectedPriority: number = 1;
+  onSelect?: (phrase: string, priority: number) => void;
   onCancel?: () => void;
+  onPrioritySelect?: (priority: number) => void;
 
   build() {
     Column({ space: 12 }) {
-      Text('选一句发给 TA')
+      Text('想做了')
         .fontSize($r('app.float.font_subtitle'))
         .fontWeight(FontWeight.Medium)
         .fontColor($r('app.color.text_primary'))
         .width('100%')
+
+      PriorityPicker({
+        selected: this.selectedPriority,
+        onSelect: (level: number) => {
+          this.onPrioritySelect?.(level);
+        }
+      })
+
+      Text('选一句发给 TA')
+        .fontSize($r('app.float.font_caption'))
+        .fontColor($r('app.color.text_secondary'))
+        .width('100%')
+
       Flex({ wrap: FlexWrap.Wrap }) {
         ForEach(PresetPhrases.forwardPhrases(), (phrase: string) => {
           Text(phrase)
@@ -27,11 +41,12 @@ export struct ForwardPhrasePicker {
             .borderRadius(16)
             .margin({ right: 8, bottom: 8 })
             .onClick(() => {
-              this.onSelect?.(phrase);
+              this.onSelect?.(phrase, this.selectedPriority);
             })
         }, (phrase: string) => phrase)
       }
       .width('100%')
+
       Button('取消')
         .width('100%')
         .backgroundColor($r('app.color.page_bg'))

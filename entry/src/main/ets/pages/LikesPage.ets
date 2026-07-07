@@ -9,13 +9,16 @@ import { RecipeCard } from '../components/recipe/RecipeCard';
 import { EmptyState } from '../components/common/EmptyState';
 import { Recipe } from '../model/Recipe';
 import { RecipeRepository } from '../repository/RecipeRepository';
-import { LikeRepository } from '../repository/LikeRepository';
+import { LikeRepository, LIKE_VERSION } from '../repository/LikeRepository';
+import { RECIPE_STATS_VERSION } from '../repository/RecipeStatsRepository';
 import { RouteName } from '../common/Constants';
 import { rippleTransition } from '../common/transition/WaterRippleTransition';
 
 @Component
 export struct LikesPage {
   pathStack: NavPathStack = new NavPathStack();
+  @StorageLink(LIKE_VERSION) @Watch('onLikeChanged') private likeVersion: number = 0;
+  @StorageLink(RECIPE_STATS_VERSION) private statsVersion: number = 0;
   @State private list: Recipe[] = [];
 
   aboutToAppear(): void {
@@ -34,6 +37,10 @@ export struct LikesPage {
       }
     });
     this.list = result;
+  }
+
+  private onLikeChanged(): void {
+    this.reload();
   }
 
   build() {
@@ -57,7 +64,7 @@ export struct LikesPage {
                   }
                 })
               }
-            }, (item: Recipe) => item.id)
+            }, (item: Recipe) => `${item.id}_${this.likeVersion}_${this.statsVersion}`)
           }
           .columnsTemplate('1fr 1fr')
           .rowsGap(12)

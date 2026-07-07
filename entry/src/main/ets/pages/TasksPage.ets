@@ -1,124 +1,78 @@
 /**
- * TasksPage - 任务(Tab)
- *
- * 作用：集中展示两类待办——
- *   1) 进行中的烹饪会话(带进度条，可直接“做完了/放弃”)；
- *   2) 情侣空间的待办任务(SpaceTask)。
- *   两者都为空时展示引导文案：“目前无待办事项，可以想想做什么或者买什么啦”。
- * 复用：MainPage 的“任务”Tab 内容。
+ * TasksPage - 任务(Tab)：进行中 + 待打卡 + 待夸赞
  */
-import { promptAction } from '@kit.ArkUI';
 import { EmptyState } from '../components/common/EmptyState';
-import { CookingSession } from '../model/CookingSession';
-import { CookingSessionManager } from '../service/CookingSessionManager';
-import { SpaceRepository, SPACE_VERSION } from '../repository/SpaceRepository';
-import { SpaceTask } from '../model/SpaceTask';
 import { SpaceTaskCard } from '../components/space/SpaceTaskCard';
+import { SpaceRepository, SPACE_VERSION } from '../repository/SpaceRepository';
+import { SpaceTask, SpaceTaskType } from '../model/SpaceTask';
 import { RouteName } from '../common/Constants';
 import { LocalUserService } from '../service/LocalUserService';
-import { SoundService } from '../service/SoundService';
 
 @Component
 export struct TasksPage {
   pathStack: NavPathStack = new NavPathStack();
-  @StorageLink('activeCookingCount') private cookingCount: number = 0;
-  @StorageLink(SPACE_VERSION) private spaceVersion: number = 0;
-  @State private sessions: CookingSession[] = [];
-  @State private spaceTasks: SpaceTask[] = [];
-  @State private now: number = Date.now();
-  private timerId: number = -1;
+  private readonly userId: string = LocalUserService.getSelfId();
+  @StorageLink(SPACE_VERSION) @Watch('onSpaceChanged') private spaceVersion: number = 0;
+  @State private doingTasks: SpaceTask[] = [];
+  @State private checkInTasks: SpaceTask[] = [];
+  @State private praiseTasks: SpaceTask[] = [];
 
   aboutToAppear(): void {
     SpaceRepository.getInstance().ensureLocalCoupleSpace();
     this.refresh();
-    this.timerId = setInterval(() => {
-      this.now = Date.now();
-      this.refresh();
-    }, 1000);
   }
 
-  aboutToDisappear(): void {
-    if (this.timerId !== -1) {
-      clearInterval(this.timerId);
-      this.timerId = -1;
-    }
+  private onSpaceChanged(): void {
+    this.refresh();
   }
 
   private refresh(): void {
-    this.sessions = CookingSessionManager.getInstance().getActive();
-    this.spaceTasks = SpaceRepository.getInstance().getActiveTasks();
+    const repo: SpaceRepository = SpaceRepository.getInstance();
+    this.doingTasks = repo.getDoingTasks(this.userId);
+    this.checkInTasks = repo.getPendingCheckInTasks(this.userId);
+    this.praiseTasks = repo.getPendingPraiseTasks(this.userId);
   }
 
-  private hasAnyTodo(): boolean {
-    return this.sessions.length > 0 || this.spaceTasks.length > 0;
+  private hasAnyContent(): boolean {
+    return this.doingTasks.length > 0 || this.checkInTasks.length > 0 || this.praiseTasks.length > 0;
   }
 
-  /**
-   * 计算进度百分比(0-100)，最高 100。
-   */
-  private progressOf(s: CookingSession): number {
-    const total: number = s.expectedEndTime - s.startTime;
-    if (total <= 0) {
-      return 100;
+  private openTaskDetail(taskId: string): void {
+    this.pathStack.pushPath({ name: RouteName.TASK_DETAIL, param: taskId });
+  }
+
+  private openCheckIn(task: SpaceTask): void {
+    if (task.type === SpaceTaskType.RECIPE_COOKING && task.relatedRecipeId.length > 0) {
+      this.pathStack.pushPath({ name: RouteName.COOK_COMPLETE, param: task.relatedRecipeId });
+    } else {
+      this.openTaskDetail(task.id);
     }
-    const ratio: number = (this.now - s.startTime) / total * 100;
-    return Math.min(Math.max(ratio, 0), 100);
-  }
-
-  private remainText(s: CookingSession): string {
-    const remainMs: number = s.expectedEndTime - this.now;
-    if (remainMs <= 0) {
-      return '已超时，做完了吗？';
-    }
-    const min: number = Math.ceil(remainMs / 60000);
-    return `预计还需 ${min} 分钟`;
   }
 
   @Builder
-  CookingItem(s: CookingSession) {
+  CheckInItem(task: SpaceTask) {
     Column({ space: 8 }) {
       Row() {
-        Text(`🍳 ${s.recipeTitle}`)
+        Text(`📷 ${task.title}`)
           .fontSize($r('app.float.font_body'))
           .fontColor($r('app.color.text_primary'))
           .layoutWeight(1)
-        Text(this.remainText(s))
+        Text('待打卡')
           .fontSize($r('app.float.font_caption'))
-          .fontColor($r('app.color.text_secondary'))
+          .fontColor($r('app.color.brand'))
       }
       .width('100%')
 
-      Progress({ value: this.progressOf(s), total: 100, type: ProgressType.Linear })
-        .color($r('app.color.brand'))
+      Button('上传打卡照片')
         .width('100%')
-
-      Row({ space: 12 }) {
-        Button('做完了')
-          .height(36)
-          .fontSize($r('app.float.font_caption'))
-          .fontColor($r('app.color.text_on_brand'))
-          .backgroundColor($r('app.color.brand'))
-          .borderRadius(18)
-          .onClick(() => {
-            CookingSessionManager.getInstance().completeByRecipe(s.recipeId);
-            SpaceRepository.getInstance()
-              .createRecipeDoneTask(s.recipeId, s.recipeTitle, LocalUserService.getSelfId());
-            this.refresh();
-            SoundService.feedback();
-            promptAction.showToast({ message: '完成打卡！', duration: 1200 });
-          })
-        Button('放弃')
-          .height(36)
-          .fontSize($r('app.float.font_caption'))
-          .fontColor($r('app.color.text_secondary'))
-          .backgroundColor($r('app.color.page_bg'))
-          .borderRadius(18)
-          .onClick(() => {
-            CookingSessionManager.getInstance().abandonByRecipe(s.recipeId);
-            this.refresh();
-          })
-      }
-      .width('100%')
+        .height(40)
+        .fontSize($r('app.float.font_caption'))
+        .fontColor($r('app.color.text_on_brand'))
+        .backgroundColor($r('app.color.brand'))
+        .borderRadius(20)
+        .onClick(() => {
+          this.openCheckIn(task);
+        })
     }
     .width('100%')
     .padding(14)
@@ -145,30 +99,45 @@ export struct TasksPage {
         .width('100%')
         .padding({ left: 16, top: 12, bottom: 12 })
 
-      if (!this.hasAnyTodo()) {
+      if (!this.hasAnyContent()) {
         Column() {
-          EmptyState({ emoji: '🗒️', message: '目前无待办事项，可以想想做什么或者买什么啦' })
+          EmptyState({ emoji: '🗒️', message: '暂无进行中的任务' })
         }
         .layoutWeight(1)
         .justifyContent(FlexAlign.Center)
       } else {
         Scroll() {
           Column({ space: 12 }) {
-            if (this.sessions.length > 0) {
-              this.SectionHeader('进行中的烹饪')
-              ForEach(this.sessions, (s: CookingSession) => {
-                this.CookingItem(s)
-              }, (s: CookingSession) => s.id)
-            }
-
-            if (this.spaceTasks.length > 0) {
-              this.SectionHeader('空间待办')
-              ForEach(this.spaceTasks, (task: SpaceTask) => {
+            if (this.doingTasks.length > 0) {
+              this.SectionHeader('进行中')
+              ForEach(this.doingTasks, (task: SpaceTask) => {
                 SpaceTaskCard({
                   task: task,
+                  viewerId: this.userId,
                   showUnread: true,
                   onCardClick: (taskId: string) => {
-                    this.pathStack.pushPath({ name: RouteName.TASK_DETAIL, param: taskId });
+                    this.openTaskDetail(taskId);
+                  }
+                })
+              }, (task: SpaceTask) => `${task.id}_${this.spaceVersion}`)
+            }
+
+            if (this.checkInTasks.length > 0) {
+              this.SectionHeader('待打卡')
+              ForEach(this.checkInTasks, (task: SpaceTask) => {
+                this.CheckInItem(task)
+              }, (task: SpaceTask) => `${task.id}_${this.spaceVersion}`)
+            }
+
+            if (this.praiseTasks.length > 0) {
+              this.SectionHeader('待夸赞')
+              ForEach(this.praiseTasks, (task: SpaceTask) => {
+                SpaceTaskCard({
+                  task: task,
+                  viewerId: this.userId,
+                  showUnread: true,
+                  onCardClick: (taskId: string) => {
+                    this.openTaskDetail(taskId);
                   }
                 })
               }, (task: SpaceTask) => `${task.id}_${this.spaceVersion}`)
@@ -184,5 +153,10 @@ export struct TasksPage {
     .width('100%')
     .height('100%')
     .backgroundColor($r('app.color.page_bg'))
+    .onVisibleAreaChange([0.0, 1.0], (isExpanding: boolean, _currentRatio: number) => {
+      if (isExpanding) {
+        this.refresh();
+      }
+    })
   }
 }

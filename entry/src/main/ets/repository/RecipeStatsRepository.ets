@@ -24,6 +24,10 @@ export class RecipeStatsRepository {
     return RecipeStatsRepository.instance;
   }
 
+  initStorage(): void {
+    AppStorage.setOrCreate(RECIPE_STATS_VERSION, 0);
+  }
+
   private ensureLoaded(): void {
     if (this.loaded) {
       return;
@@ -34,7 +38,7 @@ export class RecipeStatsRepository {
       this.cache.set(stats.recipeId, stats);
     });
     this.loaded = true;
-    AppStorage.setOrCreate(RECIPE_STATS_VERSION, 0);
+    this.initStorage();
   }
 
   private persist(): void {

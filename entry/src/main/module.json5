@@ -36,6 +36,14 @@
         }
       },
       {
+        "name": "ohos.permission.CAMERA",
+        "reason": "$string:permission_camera_reason",
+        "usedScene": {
+          "abilities": ["EntryAbility"],
+          "when": "inuse"
+        }
+      },
+      {
         "name": "ohos.permission.VIBRATE",
         "reason": "$string:permission_vibrate_reason",
         "usedScene": {

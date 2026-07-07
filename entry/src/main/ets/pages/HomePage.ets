@@ -13,13 +13,16 @@ import { Recipe } from '../model/Recipe';
 import { RecipeRepository } from '../repository/RecipeRepository';
 import { RecipeStatsRepository } from '../repository/RecipeStatsRepository';
 import { RouteName } from '../common/Constants';
+import { SpaceRepository, SPACE_VERSION } from '../repository/SpaceRepository';
+import { LocalUserService } from '../service/LocalUserService';
 
 @Component
 export struct HomePage {
   pathStack: NavPathStack = new NavPathStack();
   onSwitchTab?: (index: number) => void;
-  @StorageLink('activeCookingCount') private cookingCount: number = 0;
-  @StorageLink('recipeStatsVersion') private statsVersion: number = 0;
+  @StorageLink(SPACE_VERSION) @Watch('onSpaceDataChanged') private spaceVersion: number = 0;
+  @StorageLink('recipeStatsVersion') @Watch('onStatsVersionChanged') private statsVersion: number = 0;
+  @State private pendingCheckInCount: number = 0;
   @State private recommended: Recipe[] = [];
   @State private rankPreview: Recipe[] = [];
   @State private loading: boolean = true;
@@ -27,6 +30,12 @@ export struct HomePage {
 
   aboutToAppear(): void {
     this.loadData();
+    this.refreshCheckInCount();
+  }
+
+  private refreshCheckInCount(): void {
+    this.pendingCheckInCount = SpaceRepository.getInstance()
+      .getPendingCheckInTasks(LocalUserService.getSelfId()).length;
   }
 
   private loadData(): void {
@@ -45,8 +54,17 @@ export struct HomePage {
       }
     });
     this.rankPreview = preview.slice(0, 3);
-    statsRepo.bumpVersion();
     this.loading = false;
+  }
+
+  private onStatsVersionChanged(): void {
+    if (!this.loading) {
+      this.loadData();
+    }
+  }
+
+  private onSpaceDataChanged(): void {
+    this.refreshCheckInCount();
   }
 
   private onRefresh(): void {
@@ -76,6 +94,7 @@ export struct HomePage {
       Text(`🔁 ${RecipeStatsRepository.getInstance().getStats(item.id).forwardCount}`)
         .fontSize($r('app.float.font_caption'))
         .fontColor($r('app.color.text_secondary'))
+        .key(`rank_fwd_${item.id}_${this.statsVersion}`)
     }
     .width('100%')
     .padding(12)
@@ -99,9 +118,9 @@ export struct HomePage {
               .margin({ top: 12 })
 
             CookingBanner({
-              count: this.cookingCount,
+              count: this.pendingCheckInCount,
               onTap: () => {
-                if (this.cookingCount > 0) {
+                if (this.pendingCheckInCount > 0) {
                   this.onSwitchTab?.(2);
                 }
               }

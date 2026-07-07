@@ -47,6 +47,18 @@
     {
       "name": "mask",
       "value": "#66000000"
+    },
+    {
+      "name": "priority_1_bg",
+      "value": "#FFE0E6"
+    },
+    {
+      "name": "priority_2_bg",
+      "value": "#FFEAD6"
+    },
+    {
+      "name": "priority_3_bg",
+      "value": "#FFF5D6"
     }
   ]
 }

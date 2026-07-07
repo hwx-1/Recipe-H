@@ -20,6 +20,9 @@ import { SettingsPage } from './SettingsPage';
 import { LoginPage } from './LoginPage';
 import { LegalDocPage } from './LegalDocPage';
 import { TaskDetailPage } from './TaskDetailPage';
+import { CookCompletePage } from './CookCompletePage';
+import { TaskPublishPage } from './TaskPublishPage';
+import { SpaceFeedListPage } from './SpaceFeedListPage';
 import { RouteName, KEY_SWITCH_TAB } from '../common/Constants';
 import { SpaceRepository, SPACE_VERSION } from '../repository/SpaceRepository';
 import { LocalUserService } from '../service/LocalUserService';
@@ -28,7 +31,7 @@ import { LocalUserService } from '../service/LocalUserService';
 export struct MainPage {
   @State private currentTab: number = 0;
   @State private spaceBadge: number = 0;
-  @StorageLink('activeCookingCount') private cookingCount: number = 0;
+  @State private taskBadge: number = 0;
   @StorageLink(SPACE_VERSION) @Watch('onSpaceDataChanged') private spaceVersion: number = 0;
   @StorageLink(KEY_SWITCH_TAB) @Watch('onTabSwitchRequest') private switchTabRequest: number = -1;
   private pathStack: NavPathStack = new NavPathStack();
@@ -52,12 +55,7 @@ export struct MainPage {
   private refreshBadges(): void {
     const userId: string = LocalUserService.getSelfId();
     this.spaceBadge = SpaceRepository.getInstance().getUnreadCount(userId);
-  }
-
-  private taskBadgeCount(): number {
-    let count: number = this.cookingCount;
-    count += SpaceRepository.getInstance().getActiveTasks().length;
-    return count;
+    this.taskBadge = SpaceRepository.getInstance().getTasksTabCount(userId);
   }
 
   @Builder
@@ -82,6 +80,12 @@ export struct MainPage {
       LoginPage({ pathStack: this.pathStack })
     } else if (name === RouteName.TASK_DETAIL) {
       TaskDetailPage({ taskId: param as string, pathStack: this.pathStack })
+    } else if (name === RouteName.COOK_COMPLETE) {
+      CookCompletePage({ recipeId: param as string, pathStack: this.pathStack })
+    } else if (name === RouteName.TASK_PUBLISH) {
+      TaskPublishPage({ defaultPriority: param as string, pathStack: this.pathStack })
+    } else if (name === RouteName.SPACE_FEED) {
+      SpaceFeedListPage({ pathStack: this.pathStack })
     }
   }
 
@@ -109,7 +113,7 @@ export struct MainPage {
       AppTabBar({
         current: this.currentTab,
         spaceBadge: this.spaceBadge,
-        taskBadge: this.taskBadgeCount(),
+        taskBadge: this.taskBadge,
         onSelect: (index: number) => {
           this.currentTab = index;
           this.refreshBadges();

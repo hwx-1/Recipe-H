@@ -5,8 +5,10 @@ import { PrefsUtil } from '../common/PrefsUtil';
 import { AgcInitializer } from '../service/AgcInitializer';
 import { LocalUserService } from '../service/LocalUserService';
 import { AccountService } from '../service/AccountService';
-import { CookingSessionManager } from '../service/CookingSessionManager';
 import { SpaceRepository } from '../repository/SpaceRepository';
+import { RecipeStatsRepository } from '../repository/RecipeStatsRepository';
+import { FavoriteRepository } from '../repository/FavoriteRepository';
+import { LikeRepository } from '../repository/LikeRepository';
 
 const DOMAIN = 0x0000;
 
@@ -22,7 +24,9 @@ export default class EntryAbility extends UIAbility {
     LocalUserService.initStorage();
     SpaceRepository.getInstance().initStorage();
     SpaceRepository.getInstance().ensureLocalCoupleSpace();
-    CookingSessionManager.getInstance().restoreSessions();
+    RecipeStatsRepository.getInstance().initStorage();
+    FavoriteRepository.getInstance().initStorage();
+    LikeRepository.getInstance().initStorage();
     AgcInitializer.init(this.context);
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
   }

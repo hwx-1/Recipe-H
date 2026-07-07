@@ -13,14 +13,14 @@ import { Recipe, RecipeStep, Ingredient } from '../model/Recipe';
 import { RecipeRepository } from '../repository/RecipeRepository';
 import { FavoriteRepository } from '../repository/FavoriteRepository';
 import { LikeRepository } from '../repository/LikeRepository';
-import { RecipeStatsRepository } from '../repository/RecipeStatsRepository';
+import { RecipeStatsRepository, RECIPE_STATS_VERSION } from '../repository/RecipeStatsRepository';
 import { RecipeStatsBar } from '../components/recipe/RecipeStatsBar';
 import { ForwardPhrasePicker } from '../components/space/ForwardPhrasePicker';
-import { CookingSessionManager } from '../service/CookingSessionManager';
-import { SpaceRepository } from '../repository/SpaceRepository';
+import { SpaceRepository, SPACE_VERSION } from '../repository/SpaceRepository';
 import { LocalUserService } from '../service/LocalUserService';
 import { SoundService } from '../service/SoundService';
 import { rippleTransition } from '../common/transition/WaterRippleTransition';
+import { RouteName } from '../common/Constants';
 
 @Component
 export struct RecipeDetailPage {
@@ -28,9 +28,13 @@ export struct RecipeDetailPage {
   pathStack: NavPathStack = new NavPathStack();
   @State private recipe: Recipe | undefined = undefined;
   @State private cooking: boolean = false;
+  @State private pendingCheckIn: boolean = false;
   @State private favorite: boolean = false;
   @State private liked: boolean = false;
   @State private showForwardPicker: boolean = false;
+  @State private forwardPriority: number = 1;
+  @StorageLink(RECIPE_STATS_VERSION) private statsVersion: number = 0;
+  private readonly userId: string = LocalUserService.getSelfId();
 
   aboutToAppear(): void {
     SpaceRepository.getInstance().ensureLocalCoupleSpace();
@@ -39,7 +43,13 @@ export struct RecipeDetailPage {
     this.recipe = repo.getById(this.recipeId);
     this.favorite = FavoriteRepository.getInstance().isFavorite(this.recipeId);
     this.liked = LikeRepository.getInstance().isLiked(this.recipeId);
-    this.cooking = CookingSessionManager.getInstance().isCooking(this.recipeId);
+    this.refreshCookingState();
+  }
+
+  private refreshCookingState(): void {
+    const spaceRepo: SpaceRepository = SpaceRepository.getInstance();
+    this.cooking = spaceRepo.isCookingRecipe(this.recipeId, this.userId);
+    this.pendingCheckIn = spaceRepo.isPendingCheckInRecipe(this.recipeId, this.userId);
   }
 
   private confirmStartCooking(): void {
@@ -49,7 +59,7 @@ export struct RecipeDetailPage {
     const title: string = this.recipe.title;
     promptAction.showDialog({
       title: '开始做这道菜',
-      message: `确定现在开始做《${title}》吗？开始后会为它单独计时并在超时时提醒你。`,
+      message: `确定现在开始做《${title}》吗？会加入小空间待办，做完记得打卡上传照片。`,
       buttons: [
         { text: '再想想', color: '#8A8A99' },
         { text: '开始', color: '#FF6B81' }
@@ -65,9 +75,10 @@ export struct RecipeDetailPage {
     if (this.recipe === undefined) {
       return;
     }
-    CookingSessionManager.getInstance().start(this.recipe);
-    this.cooking = true;
-    this.toast('已开始，做完记得点“做完了”打卡');
+    SpaceRepository.getInstance()
+      .startCookingTask(this.recipeId, this.recipe.title, this.userId, LocalUserService.getSelfName());
+    this.refreshCookingState();
+    this.toast('已加入待办，做完记得点「做完了」打卡');
   }
 
   private confirmForward(): void {
@@ -76,8 +87,8 @@ export struct RecipeDetailPage {
     }
     const title: string = this.recipe.title;
     promptAction.showDialog({
-      title: '转发到情侣空间',
-      message: `把《${title}》分享到你们的小空间吗？TA 会在空间动态里看到这道菜。`,
+      title: '想做了',
+      message: `把《${title}》加入小空间待办吗？TA 会在待办任务里看到。`,
       buttons: [
         { text: '取消', color: '#8A8A99' },
         { text: '继续', color: '#FF6B81' }
@@ -89,34 +100,32 @@ export struct RecipeDetailPage {
     });
   }
 
-  private forwardWithPhrase(phrase: string): void {
+  private forwardWithPhrase(phrase: string, priority: number): void {
     if (this.recipe === undefined) {
       return;
     }
     SpaceRepository.getInstance()
-      .addFeedShare(this.recipeId, this.recipe.title, phrase,
-        LocalUserService.getSelfId(), LocalUserService.getSelfName());
+      .createForwardTask(this.recipeId, this.recipe.title, phrase, LocalUserService.getSelfId(), priority,
+        LocalUserService.getSelfName());
     RecipeStatsRepository.getInstance().addForward(this.recipeId);
     this.showForwardPicker = false;
     SoundService.feedback();
-    this.toast('已分享到情侣空间');
+    this.toast('已加入待办任务');
   }
 
-  private finishCooking(): void {
-    CookingSessionManager.getInstance().completeByRecipe(this.recipeId);
-    this.cooking = false;
-    if (this.recipe !== undefined) {
+  private goCookComplete(): void {
+    if (this.recipe !== undefined && this.cooking) {
       SpaceRepository.getInstance()
-        .createRecipeDoneTask(this.recipeId, this.recipe.title, LocalUserService.getSelfId());
-      this.toast('完成打卡！已通知 TA');
-    } else {
-      this.toast('完成打卡！');
+        .markCookingPendingCheckIn(this.recipeId, this.recipe.title, this.userId, LocalUserService.getSelfName());
+      this.refreshCookingState();
     }
+    this.pathStack.pushPath({ name: RouteName.COOK_COMPLETE, param: this.recipeId });
   }
 
   private abandonCooking(): void {
-    CookingSessionManager.getInstance().abandonByRecipe(this.recipeId);
-    this.cooking = false;
+    SpaceRepository.getInstance()
+      .cancelCookingTask(this.recipeId, this.userId, LocalUserService.getSelfName());
+    this.refreshCookingState();
     this.toast('已放弃本次');
   }
 
@@ -197,6 +206,7 @@ export struct RecipeDetailPage {
 
                 RecipeStatsBar({ recipeId: this.recipe.id })
                   .margin({ top: 4 })
+                  .key(`stats_${this.recipe.id}_${this.statsVersion}`)
 
                 this.SectionTitle('用料')
                 ForEach(this.recipe.ingredients, (ing: Ingredient) => {
@@ -261,8 +271,12 @@ export struct RecipeDetailPage {
             Column() {
               Blank()
               ForwardPhrasePicker({
-                onSelect: (phrase: string) => {
-                  this.forwardWithPhrase(phrase);
+                selectedPriority: this.forwardPriority,
+                onPrioritySelect: (level: number) => {
+                  this.forwardPriority = level;
+                },
+                onSelect: (phrase: string, priority: number) => {
+                  this.forwardWithPhrase(phrase, priority);
                 },
                 onCancel: () => {
                   this.showForwardPicker = false;
@@ -280,7 +294,9 @@ export struct RecipeDetailPage {
     .title('食谱详情')
     .backgroundColor($r('app.color.page_bg'))
     .onShown(() => {
+      this.favorite = FavoriteRepository.getInstance().isFavorite(this.recipeId);
       this.liked = LikeRepository.getInstance().isLiked(this.recipeId);
+      this.refreshCookingState();
     })
     .transition(rippleTransition())
   }
@@ -298,7 +314,7 @@ export struct RecipeDetailPage {
   BottomBar() {
     Column({ space: 6 }) {
       Row({ space: 12 }) {
-        Button('转到空间')
+        Button('想做了')
           .layoutWeight(1)
           .height(46)
           .fontColor($r('app.color.brand'))
@@ -307,15 +323,15 @@ export struct RecipeDetailPage {
           .onClick(() => {
             this.confirmForward();
           })
-        Button(this.cooking ? '做完了' : '开始做')
+        Button(this.pendingCheckIn ? '上传打卡' : (this.cooking ? '做完了' : '开始做'))
           .layoutWeight(1)
           .height(46)
           .fontColor($r('app.color.text_on_brand'))
           .backgroundColor($r('app.color.brand'))
           .borderRadius(23)
           .onClick(() => {
-            if (this.cooking) {
-              this.finishCooking();
+            if (this.pendingCheckIn || this.cooking) {
+              this.goCookComplete();
             } else {
               this.confirmStartCooking();
             }
